@@ -10,6 +10,7 @@
  *   -> routes -> not-found -> error handler
  */
 
+import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -35,6 +36,18 @@ export function createApp(): Express {
 
   app.use(requestId);
   app.use(helmet());
+
+  // The browser blocks a cross-origin request unless the server opts in, and
+  // in development the SPA is served from another port. An explicit
+  // allowlist rather than `origin: true`, which reflects whatever Origin is
+  // sent and so permits every site.
+  app.use(
+    cors({
+      origin: config.CORS_ORIGINS,
+      credentials: true,
+      maxAge: 600,
+    }),
+  );
 
   app.use(
     pinoHttp({

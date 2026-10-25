@@ -50,6 +50,12 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
 
+  /** Comma-separated origins the browser may call this API from. */
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:4200')
+    .transform((value) => value.split(',').map((origin) => origin.trim()).filter(Boolean)),
+
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),

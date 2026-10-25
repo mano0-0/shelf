@@ -20,7 +20,9 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@types/cors": "^2.8.19",
     "argon2": "^0.41.1",
+    "cors": "^2.8.6",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",

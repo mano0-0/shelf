@@ -133,6 +133,17 @@ is an error, because it makes environments silently diverge.
 The Docker image is multi-stage and runs as a non-root user; no compiler, dev
 dependencies or TypeScript source ship in it.
 
+## A web client
+
+[shelf-web](https://github.com/mano0-0/shelf-web) is an Angular front end for
+this API — sign-in, the shelf, and an HTTP interceptor that refreshes an
+expired access token and retries the request. Kept in its own repository so
+this one stays a backend project rather than becoming half of a full-stack
+one.
+
+`CORS_ORIGINS` controls which origins the browser may call from; it defaults
+to `http://localhost:4200`, where the Angular dev server runs.
+
 ## Licence
 
 MIT
