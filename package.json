@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests --ext .ts",
-    "spec": "tsx src/openapi/emit.ts"
+    "spec": "tsx src/openapi/emit.ts",
+    "seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",

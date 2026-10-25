@@ -23,6 +23,17 @@ npm run dev
 environment variables take precedence, so a deployed container's config is
 never shadowed by a file in the image.
 
+For something to look at rather than an empty shelf:
+
+```bash
+npm run seed
+```
+
+That creates a demo account — **demo@shelf.local** / **demo-password-long-enough**
+— with twelve books across the three statuses. It goes through the same
+repositories the API uses, so the rows are exactly what the endpoints would
+have produced, and it is idempotent.
+
 ```bash
 curl localhost:3000/health
 curl localhost:3000/openapi.json | jq '.paths | keys'
