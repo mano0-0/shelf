@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # A real PostgreSQL, because the tests are integration tests. Mocking it
+    # in CI would defeat the point of having written them that way.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: shelf
+          POSTGRES_PASSWORD: shelf
+          POSTGRES_DB: shelf
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U shelf -d shelf"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://shelf:shelf@localhost:5433/shelf
+      JWT_SECRET: ci-only-secret-at-least-32-characters-long
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Migrate
+        run: npm run migrate
+      - name: Test
+        run: npm test
+
+      - name: The OpenAPI document must generate
+        run: npx tsx -e "import('./src/openapi/document.js').then(m => { const d = m.openApiDocument(); if (!d || Object.keys(d.paths ?? {}).length === 0) { throw new Error('empty spec'); } console.log(Object.keys(d.paths).length + ' paths'); })"
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The image must build
+        run: docker build -t shelf:ci .
