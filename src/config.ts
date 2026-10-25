@@ -10,7 +10,26 @@
  * production, so this refuses to start instead.
  */
 
+import { existsSync } from 'node:fs';
+import { loadEnvFile } from 'node:process';
+
 import { z } from 'zod';
+
+/**
+ * Load .env if present, before anything reads process.env.
+ *
+ * Node 20.12+ can do this without a dependency. Real environment variables
+ * already set take precedence, so a deployed container's configuration is
+ * never shadowed by a stray file in the image.
+ */
+if (existsSync('.env')) {
+  try {
+    loadEnvFile('.env');
+  } catch {
+    // A malformed .env should not stop the process: the validation below
+    // will report precisely which variables are missing.
+  }
+}
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -48,7 +67,21 @@ function load(): Config {
     const problems = parsed.error.issues
       .map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
       .join('\n');
-    throw new Error(`Invalid environment configuration:\n${problems}`);
+
+    // A configuration error is the first thing a newcomer hits, so say how
+    // to fix it rather than only what is wrong.
+    const hint = existsSync('.env')
+      ? 'Check the values in .env against .env.example.'
+      : [
+          'No .env file found. To create one:',
+          '',
+          '  cp .env.example .env',
+          '  echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env',
+          '',
+          'Then start the database with `docker compose up -d`.',
+        ].join('\n');
+
+    throw new Error(`Invalid environment configuration:\n${problems}\n\n${hint}`);
   }
 
   return {

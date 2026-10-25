@@ -11,12 +11,17 @@ important is stubbed.
 ## Run it
 
 ```bash
-cp .env.example .env          # then set JWT_SECRET: openssl rand -hex 32
 npm install
+cp .env.example .env
+echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
 docker compose up -d          # PostgreSQL on 5433
 npm run migrate
 npm run dev
 ```
+
+`.env` is read automatically (Node's built-in loader, no dependency). Real
+environment variables take precedence, so a deployed container's config is
+never shadowed by a file in the image.
 
 ```bash
 curl localhost:3000/health
